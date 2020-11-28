@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width">
+
+    <title>createMediaStreamSource example</title>
+
+    <style>
+        #canvas {
+            margin-left: auto;
+            margin-right: auto;
+            display: block;
+            background-color: black;
+        }
+
+        #controls {
+            text-align: center;
+        }
+
+        #start_button,
+        #stop_button {
+            font-size: 16pt;
+        }
+
+        #msg {
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <audio id="audio" src="./alone.mp3"></audio>
+    <canvas id="canvas" width="512" height="256"></canvas>
+
+    <p id="controls">
+        <input type="button" id="start_button" value="Start">
+        &nbsp; &nbsp;
+        <input type="button" id="stop_button" value="Stop">
+    <p id="msg"></p>
+    </p>
+
+    <script>
+
+        // Global Variables for Audio
+        const $audio = document.getElementById("audio");
+        let audioContext = new AudioContext();
+        let sourceNode = audioContext.createMediaElementSource($audio);
+        let analyserNode;
+        let amplitudeArray;
+        // let analyserNode = audioContext.createAnalyser();
+
+        // amplitudeArray = new Uint8Array(analyserNode.frequencyBinCount);
+        // analyserNode.getByteTimeDomainData(amplitudeArray);
+
+        // sourceNode.connect(analyserNode);
+        // sourceNode.connect(audioContext.destination);
+
+        let canvasWidth = 512;
+        let canvasHeight = 256;
+        let ctx;
+
+        ctx = document.querySelector('#canvas').getContext('2d');
+
+        document.querySelector('#start_button').addEventListener('click', function (e) {
+            audioContext = new AudioContext();
+            setupAudioNodes();
+            requestAnimationFrame(drawTimeDomain);
+            $audio.play();
+        });
+
+
+        function setupAudioNodes() {
+            // sourceNode = audioContext.createMediaElementSource($audio);
+            analyserNode = audioContext.createAnalyser();
+
+            amplitudeArray = new Uint8Array(analyserNode.frequencyBinCount);
+            analyserNode.getByteTimeDomainData(amplitudeArray);
+
+            sourceNode.connect(analyserNode);
+            sourceNode.connect(audioContext.destination);
+        }
+
+        function drawTimeDomain() {
+            clearCanvas();
+            analyserNode.getByteTimeDomainData(amplitudeArray);
+            console.log(amplitudeArray.join(""))
+            for (let i = 0; i < amplitudeArray.length; i++) {
+                let value = amplitudeArray[i] / 256;
+                let y = canvasHeight - (canvasHeight * value) - 1;
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(i, y, 1, 1);
+            }
+            requestAnimationFrame(drawTimeDomain)
+        }
+
+        function clearCanvas() {
+            ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+        }
+    </script>
+</body>
+
+</html>
