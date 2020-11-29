@@ -6,6 +6,9 @@ canvas.width = winWidth;
 canvas.height = winHeight;
 
 
+// const two = Math.PI / 2;
+
+
 
 const $audio = document.getElementById("audio");
 let audioCtx = new AudioContext();
